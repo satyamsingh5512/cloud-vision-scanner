@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  userId       String   @unique // Internal ID
+  name         String
+  email        String   @unique
+  phone        String?
+  rollno       String?  @unique
+  group        String
+  region       String?
+  qrCode       String?  @db.Text
+  registeredAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+
+  @@index([userId])
+}
+
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  name       String
+  group      String
+  scannedAt  DateTime @default(now())
+  sessionId  String   @default("default-session")
+  markedBy   String   @default("scanner")
+
+  @@index([userId])
+  @@index([userId, sessionId])
+}

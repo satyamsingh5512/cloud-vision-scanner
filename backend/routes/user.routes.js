@@ -2,12 +2,19 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 const { registerUser, getAllUsers, getUserById, deleteUser, deleteAllUsers, bulkUploadUsers } = require('../controllers/user.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 
+const uploadDir = process.env.UPLOAD_DIR || path.join(os.tmpdir(), 'event-scanner-uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // Multer setup for temporary file storage
 const upload = multer({ 
-  dest: path.join(__dirname, '../uploads'),
+  dest: uploadDir,
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'text/csv' || file.mimetype === 'application/vnd.ms-excel') {
       cb(null, true);

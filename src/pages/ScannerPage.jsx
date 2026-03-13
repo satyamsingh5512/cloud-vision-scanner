@@ -28,10 +28,9 @@ const ScannerPage = () => {
   const [lastScanned, setLastScanned] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [awaitingSwipe, setAwaitingSwipe] = useState(false);
-  const [fastMode, setFastMode] = useState(true);
   const loadingRef = useRef(false);
   const lastScannedRef = useRef(null);
-  const swipeStartXRef = useRef(null);
+  const swipeStartRef = useRef(null);
 
   useEffect(() => {
     loadingRef.current = loading;
@@ -71,14 +70,7 @@ const ScannerPage = () => {
         user: res.data.user,
         time: new Date().toLocaleTimeString()
       });
-
-      if (fastMode) {
-        setTimeout(() => {
-          resetForNextScan();
-        }, 1200);
-      } else {
-        setAwaitingSwipe(true);
-      }
+      setAwaitingSwipe(true);
       
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
@@ -91,21 +83,38 @@ const ScannerPage = () => {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [awaitingSwipe, fastMode, resetForNextScan]);
+  }, [awaitingSwipe, resetForNextScan]);
 
-  const handleSwipeStart = useCallback((clientX) => {
-    swipeStartXRef.current = clientX;
+  const handleSwipeStart = useCallback((event) => {
+    swipeStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+    };
+
+    if (event.currentTarget?.setPointerCapture) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   }, []);
 
-  const handleSwipeEnd = useCallback((clientX) => {
-    if (swipeStartXRef.current === null) return;
-    const deltaX = clientX - swipeStartXRef.current;
-    swipeStartXRef.current = null;
+  const handleSwipeEnd = useCallback((event) => {
+    const start = swipeStartRef.current;
+    if (!start) return;
 
-    if (Math.abs(deltaX) >= 60) {
+    if (start.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = Math.abs(event.clientY - start.y);
+    swipeStartRef.current = null;
+
+    if (Math.abs(deltaX) >= 50 && deltaY <= 90) {
       resetForNextScan();
     }
   }, [resetForNextScan]);
+
+  const cancelSwipe = useCallback(() => {
+    swipeStartRef.current = null;
+  }, []);
 
   const onScanError = useCallback((err) => {
     const message = String(err || '');
@@ -159,18 +168,6 @@ const ScannerPage = () => {
             Scanner<span className="text-indigo-500">Node</span>
           </h1>
           <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">Identity Verification Gateway</p>
-          <div className="mt-3 flex items-center justify-center">
-            <button
-              type="button"
-              onClick={() => {
-                setFastMode((prev) => !prev);
-                setAwaitingSwipe(false);
-              }}
-              className="btn-ghost text-xs"
-            >
-              {fastMode ? 'Fast Mode: ON' : 'Fast Mode: OFF (Swipe required)'}
-            </button>
-          </div>
         </div>
 
         <div className="relative">
@@ -197,10 +194,10 @@ const ScannerPage = () => {
               <div className={`force-white absolute inset-0 z-30 flex items-center justify-center animate-fadeIn ${
                 scanResult.success ? 'bg-emerald-500/90' : 'bg-amber-500/90'
               } backdrop-blur-md`}
-              onTouchStart={(e) => handleSwipeStart(e.touches[0].clientX)}
-              onTouchEnd={(e) => handleSwipeEnd(e.changedTouches[0].clientX)}
-              onMouseDown={(e) => handleSwipeStart(e.clientX)}
-              onMouseUp={(e) => handleSwipeEnd(e.clientX)}
+              style={{ touchAction: 'pan-y' }}
+              onPointerDown={handleSwipeStart}
+              onPointerUp={handleSwipeEnd}
+              onPointerCancel={cancelSwipe}
               >
                 <div className="flex flex-col items-center gap-2 p-8 text-center text-white">
                   <div className="mb-4 rounded-full bg-white/20 p-4 shadow-xl">
@@ -234,11 +231,9 @@ const ScannerPage = () => {
                     </svg>
                     Timestamp: {scanResult.time}
                   </div>
-                  {!fastMode && (
-                    <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
-                      Swipe Left or Right for Next Scan
-                    </p>
-                  )}
+                  <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
+                    Swipe Left or Right for Next Scan
+                  </p>
                 </div>
               </div>
             )}

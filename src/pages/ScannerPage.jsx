@@ -27,8 +27,10 @@ const ScannerPage = () => {
   const [error, setError] = useState('');
   const [lastScanned, setLastScanned] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
+  const [awaitingSwipe, setAwaitingSwipe] = useState(false);
   const loadingRef = useRef(false);
   const lastScannedRef = useRef(null);
+  const swipeStartXRef = useRef(null);
 
   useEffect(() => {
     loadingRef.current = loading;
@@ -39,6 +41,7 @@ const ScannerPage = () => {
   }, [lastScanned]);
 
   const onScanSuccess = useCallback(async (decodedText) => {
+    if (awaitingSwipe) return;
     if (loadingRef.current || decodedText === lastScannedRef.current) return;
     
     setLoading(true);
@@ -60,13 +63,7 @@ const ScannerPage = () => {
         user: res.data.user,
         time: new Date().toLocaleTimeString()
       });
-      
-      // Auto-clear success after 5 seconds to allow next scan
-      setTimeout(() => {
-        setScanResult(null);
-        setLastScanned(null);
-        lastScannedRef.current = null;
-      }, 5000);
+      setAwaitingSwipe(true);
       
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
@@ -79,7 +76,28 @@ const ScannerPage = () => {
       setLoading(false);
       loadingRef.current = false;
     }
+  }, [awaitingSwipe]);
+
+  const resetForNextScan = useCallback(() => {
+    setScanResult(null);
+    setLastScanned(null);
+    lastScannedRef.current = null;
+    setAwaitingSwipe(false);
   }, []);
+
+  const handleSwipeStart = useCallback((clientX) => {
+    swipeStartXRef.current = clientX;
+  }, []);
+
+  const handleSwipeEnd = useCallback((clientX) => {
+    if (swipeStartXRef.current === null) return;
+    const deltaX = clientX - swipeStartXRef.current;
+    swipeStartXRef.current = null;
+
+    if (Math.abs(deltaX) >= 60) {
+      resetForNextScan();
+    }
+  }, [resetForNextScan]);
 
   const onScanError = useCallback((err) => {
     const message = String(err || '');
@@ -154,7 +172,12 @@ const ScannerPage = () => {
             {scanResult && (
               <div className={`force-white absolute inset-0 z-30 flex items-center justify-center animate-fadeIn ${
                 scanResult.success ? 'bg-emerald-500/90' : 'bg-amber-500/90'
-              } backdrop-blur-md`}>
+              } backdrop-blur-md`}
+              onTouchStart={(e) => handleSwipeStart(e.touches[0].clientX)}
+              onTouchEnd={(e) => handleSwipeEnd(e.changedTouches[0].clientX)}
+              onMouseDown={(e) => handleSwipeStart(e.clientX)}
+              onMouseUp={(e) => handleSwipeEnd(e.clientX)}
+              >
                 <div className="flex flex-col items-center gap-2 p-8 text-center text-white">
                   <div className="mb-4 rounded-full bg-white/20 p-4 shadow-xl">
                     <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,12 +187,11 @@ const ScannerPage = () => {
                   <h2 className="text-4xl font-black uppercase tracking-tight">
                     {scanResult.success ? 'Verified' : 'Already Scanned'}
                   </h2>
-                  <div className="mt-4 space-y-1">
-                    <p className="text-2xl font-bold tracking-tight">{scanResult.user.name}</p>
-                    <p className="text-sm font-black uppercase tracking-[0.2em] opacity-80">
-                      {scanResult.user.event || scanResult.user.group || 'Attendee'}
-                      {scanResult.user.rollno ? ` • ${scanResult.user.rollno}` : ''}
-                    </p>
+                  <div className="mt-4 space-y-2">
+                    <p className="text-3xl font-black tracking-tight">{scanResult.user.name || 'Unknown'}</p>
+                    <p className="text-sm font-bold tracking-tight opacity-95">{scanResult.user.email || 'No email'}</p>
+                    <p className="text-sm font-black uppercase tracking-[0.2em] opacity-90">{scanResult.user.group || 'No group'}</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-85">{scanResult.user.region || 'No region'}</p>
                     {scanResult.user.ticketId && (
                       <p className="text-xs font-bold tracking-wide opacity-90">Ticket: {scanResult.user.ticketId}</p>
                     )}
@@ -188,6 +210,9 @@ const ScannerPage = () => {
                     </svg>
                     Timestamp: {scanResult.time}
                   </div>
+                  <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
+                    Swipe Left or Right for Next Scan
+                  </p>
                 </div>
               </div>
             )}

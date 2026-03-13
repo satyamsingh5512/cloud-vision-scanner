@@ -27,7 +27,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 pt-28 pb-12">
+    <div className="mx-auto max-w-6xl px-4 pb-12 pt-24 sm:pt-28">
       <div className="reveal">
         <div className="mb-10 flex flex-col items-center text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
@@ -41,9 +41,9 @@ const RegisterPage = () => {
           <p className="mt-2 text-slate-400 font-medium tracking-tight">Issue new credentials and generate unique verification keys.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
           {/* Form */}
-          <div className="lg:col-span-3">
+          <div className="xl:col-span-3">
             <div className="glass-panel p-8 rounded-3xl">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
@@ -148,7 +148,7 @@ const RegisterPage = () => {
           </div>
 
           {/* Result Card */}
-          <div className="lg:col-span-2">
+          <div className="xl:col-span-2">
             {result ? (
               <div className="glass-panel p-8 rounded-3xl text-center transform scale-100 transition-all border-emerald-500/20 bg-emerald-500/5">
                 <div className="mb-6 flex justify-center">

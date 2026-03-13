@@ -25,8 +25,10 @@ export const bulkUploadUsers = (formData) => api.post('/users/bulk-upload', form
   headers: { 'Content-Type': 'multipart/form-data' }
 });
 export const getAllUsers = () => api.get('/users');
+export const searchUsers = (q) => api.get('/users', { params: { q } });
 export const deleteAllUsers = () => api.delete('/users');
 export const getUserById = (userId) => api.get(`/users/${userId}`);
+export const updateUser = (userId, data) => api.put(`/users/${userId}`, data);
 export const deleteUser = (userId) => api.delete(`/users/${userId}`);
 
 // Scan
@@ -34,6 +36,8 @@ export const verifyScan = (data) => api.post('/scan/verify', data);
 
 // Attendance
 export const getAttendance = (params) => api.get('/attendance', { params });
+export const updateAttendanceLog = (id, data) => api.put(`/attendance/${id}`, data);
+export const deleteAttendanceLog = (id) => api.delete(`/attendance/${id}`);
 export const getAttendanceStats = (params) => api.get('/attendance/stats', { params });
 export const getAttendanceBySession = (id) => api.get(`/attendance/session/${id}`);
 export const getAttendanceByGroup = (group) => api.get(`/attendance/group/${encodeURIComponent(group)}`);

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { verifyScan } from '../services/api';
 
 const parseQrPayload = (decodedText) => {
@@ -28,6 +28,7 @@ const ScannerPage = () => {
   const [lastScanned, setLastScanned] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [awaitingSwipe, setAwaitingSwipe] = useState(false);
+  const [fastMode, setFastMode] = useState(true);
   const loadingRef = useRef(false);
   const lastScannedRef = useRef(null);
   const swipeStartXRef = useRef(null);
@@ -39,6 +40,13 @@ const ScannerPage = () => {
   useEffect(() => {
     lastScannedRef.current = lastScanned;
   }, [lastScanned]);
+
+  const resetForNextScan = useCallback(() => {
+    setScanResult(null);
+    setLastScanned(null);
+    lastScannedRef.current = null;
+    setAwaitingSwipe(false);
+  }, []);
 
   const onScanSuccess = useCallback(async (decodedText) => {
     if (awaitingSwipe) return;
@@ -63,7 +71,14 @@ const ScannerPage = () => {
         user: res.data.user,
         time: new Date().toLocaleTimeString()
       });
-      setAwaitingSwipe(true);
+
+      if (fastMode) {
+        setTimeout(() => {
+          resetForNextScan();
+        }, 1200);
+      } else {
+        setAwaitingSwipe(true);
+      }
       
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
@@ -76,14 +91,7 @@ const ScannerPage = () => {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [awaitingSwipe]);
-
-  const resetForNextScan = useCallback(() => {
-    setScanResult(null);
-    setLastScanned(null);
-    lastScannedRef.current = null;
-    setAwaitingSwipe(false);
-  }, []);
+  }, [awaitingSwipe, fastMode, resetForNextScan]);
 
   const handleSwipeStart = useCallback((clientX) => {
     swipeStartXRef.current = clientX;
@@ -120,12 +128,16 @@ const ScannerPage = () => {
 
   useEffect(() => {
     const scanner = new Html5QrcodeScanner('reader', {
-      qrbox: { width: 320, height: 320 },
-      fps: 10,
+      qrbox: { width: 260, height: 260 },
+      fps: 22,
       aspectRatio: 1.0,
       showTorchButtonIfSupported: true,
       showZoomSliderIfSupported: true,
       rememberLastUsedCamera: true,
+      formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true,
+      },
     });
 
     scanner.render(onScanSuccess, onScanError);
@@ -147,6 +159,18 @@ const ScannerPage = () => {
             Scanner<span className="text-indigo-500">Node</span>
           </h1>
           <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">Identity Verification Gateway</p>
+          <div className="mt-3 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                setFastMode((prev) => !prev);
+                setAwaitingSwipe(false);
+              }}
+              className="btn-ghost text-xs"
+            >
+              {fastMode ? 'Fast Mode: ON' : 'Fast Mode: OFF (Swipe required)'}
+            </button>
+          </div>
         </div>
 
         <div className="relative">
@@ -210,9 +234,11 @@ const ScannerPage = () => {
                     </svg>
                     Timestamp: {scanResult.time}
                   </div>
-                  <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
-                    Swipe Left or Right for Next Scan
-                  </p>
+                  {!fastMode && (
+                    <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] opacity-85">
+                      Swipe Left or Right for Next Scan
+                    </p>
+                  )}
                 </div>
               </div>
             )}

@@ -7,6 +7,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'dark';
     const saved = window.localStorage.getItem('theme');
@@ -27,6 +28,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setMenuOpen(false);
     navigate('/login');
   };
 
@@ -39,9 +41,11 @@ const Navbar = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <div className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 px-4 pt-4`}>
-      <nav className={`mx-auto max-w-6xl rounded-2xl transition-all duration-300 ${scrolled ? 'glass-panel py-3 px-6' : 'py-4 px-2'}`}>
+    <div className="fixed top-0 left-0 right-0 z-[100] px-3 pt-3 transition-all duration-300 sm:px-4 sm:pt-4">
+      <nav className={`mx-auto max-w-6xl rounded-2xl transition-all duration-300 ${scrolled ? 'glass-panel px-4 py-3 sm:px-6' : 'px-3 py-3 sm:px-2 sm:py-4'}`}>
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
@@ -58,15 +62,15 @@ const Navbar = () => {
 
           {/* Links */}
           <div className="hidden md:flex items-center gap-1">
-            <Link to="/scanner" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/scanner')}`}>
+            <Link to="/scanner" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/scanner')}`} onClick={closeMenu}>
               Scanner
             </Link>
             {isAuth && (
               <>
-                <Link to="/admin" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/admin')}`}>
+                <Link to="/admin" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/admin')}`} onClick={closeMenu}>
                   Dashboard
                 </Link>
-                <Link to="/admin/attendance" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/admin/attendance')}`}>
+                <Link to="/admin/attendance" className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all ${activeLink('/admin/attendance')}`} onClick={closeMenu}>
                   Logs
                 </Link>
               </>
@@ -74,7 +78,7 @@ const Navbar = () => {
           </div>
 
           {/* User Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={toggleTheme}
@@ -113,6 +117,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
+                onClick={closeMenu}
                 className="btn-premium flex items-center gap-2 text-sm"
               >
                 <span>Login</span>
@@ -121,8 +126,40 @@ const Navbar = () => {
                 </svg>
               </Link>
             )}
+            <button
+              type="button"
+              className="btn-ghost flex h-10 w-10 items-center justify-center md:hidden"
+              aria-label="Toggle navigation menu"
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {menuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <div className="mt-3 space-y-1 border-t border-white/10 pt-3 md:hidden">
+            <Link to="/scanner" onClick={closeMenu} className={`block rounded-lg px-3 py-2 text-sm font-semibold transition-all ${activeLink('/scanner')}`}>
+              Scanner
+            </Link>
+            {isAuth && (
+              <>
+                <Link to="/admin" onClick={closeMenu} className={`block rounded-lg px-3 py-2 text-sm font-semibold transition-all ${activeLink('/admin')}`}>
+                  Dashboard
+                </Link>
+                <Link to="/admin/attendance" onClick={closeMenu} className={`block rounded-lg px-3 py-2 text-sm font-semibold transition-all ${activeLink('/admin/attendance')}`}>
+                  Logs
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </nav>
     </div>
   );

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Archivo:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -73,7 +73,7 @@
 }
 
 body {
-  font-family: 'Manrope', system-ui, sans-serif;
+  font-family: 'Archivo', system-ui, sans-serif;
   background-color: var(--bg-main);
   color: var(--text-primary);
   min-height: 100vh;
@@ -82,8 +82,24 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Syne', sans-serif;
   letter-spacing: -0.02em;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: 0.22;
+  z-index: 1;
+}
+
+#root {
+  position: relative;
+  z-index: 2;
 }
 
 /* Premium Utilities */
@@ -93,6 +109,7 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glass-panel:hover {
@@ -162,6 +179,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-ghost:hover {
   border-color: var(--border-bright);
   color: var(--text-primary);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
@@ -373,4 +391,14 @@ table tbody tr {
 
 table tbody tr:hover {
   transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .glass-panel:hover {
+    transform: none;
+  }
+
+  table tbody tr:hover {
+    transform: none;
+  }
 }

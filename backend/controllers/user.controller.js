@@ -81,7 +81,22 @@ const registerUser = async (req, res) => {
 // GET /api/users
 const getAllUsers = async (req, res) => {
   try {
+    const { q } = req.query;
+    const where = {};
+
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { email: { contains: q, mode: 'insensitive' } },
+        { group: { contains: q, mode: 'insensitive' } },
+        { region: { contains: q, mode: 'insensitive' } },
+        { rollno: { contains: q, mode: 'insensitive' } },
+        { userId: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true,
         userId: true,
@@ -101,6 +116,54 @@ const getAllUsers = async (req, res) => {
     res.json({ count: users.length, users });
   } catch (err) {
     console.error('Get all users error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// PUT /api/users/:userId
+const updateUser = async (req, res) => {
+  try {
+    const { name, email, phone, group, rollno, region, isActive } = req.body;
+
+    const data = {};
+    if (name !== undefined) data.name = String(name).trim();
+    if (email !== undefined) data.email = String(email).trim().toLowerCase();
+    if (phone !== undefined) data.phone = phone ? String(phone).trim() : null;
+    if (group !== undefined) data.group = String(group).trim();
+    if (rollno !== undefined) data.rollno = rollno ? String(rollno).trim() : null;
+    if (region !== undefined) data.region = region ? String(region).trim() : null;
+    if (isActive !== undefined) data.isActive = Boolean(isActive);
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ message: 'No update fields provided' });
+    }
+
+    const user = await prisma.user.update({
+      where: { userId: req.params.userId },
+      data,
+      select: {
+        id: true,
+        userId: true,
+        name: true,
+        email: true,
+        phone: true,
+        rollno: true,
+        group: true,
+        region: true,
+        registeredAt: true,
+        isActive: true,
+      }
+    });
+
+    res.json({ message: 'User updated successfully', user });
+  } catch (err) {
+    console.error('Update user error:', err);
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (err.code === 'P2002') {
+      return res.status(409).json({ message: 'Email or roll number already exists' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -239,4 +302,4 @@ const bulkUploadUsers = async (req, res) => {
     });
 };
 
-module.exports = { registerUser, getAllUsers, getUserById, deleteUser, deleteAllUsers, bulkUploadUsers };
+module.exports = { registerUser, getAllUsers, getUserById, updateUser, deleteUser, deleteAllUsers, bulkUploadUsers };

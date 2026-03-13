@@ -24,12 +24,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 pt-20">
-      <div className="reveal w-full max-w-md">
+    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 pb-8 pt-24 sm:pb-10 sm:pt-28">
+      <div className="reveal w-full max-w-md sm:max-w-lg">
         {/* Decorative elements */}
         <div className="absolute top-1/2 left-1/2 -z-10 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/10 blur-[100px]" />
         
-        <div className="glass-panel overflow-hidden rounded-3xl p-8 md:p-10">
+        <div className="glass-panel overflow-hidden rounded-3xl p-6 sm:p-8 md:p-10">
           {/* Header */}
           <div className="mb-10 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-500 shadow-inner">
@@ -37,7 +37,7 @@ const LoginPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Welcome Back</h1>
             <p className="mt-2 text-sm text-slate-400 font-medium tracking-tight">Enter your credentials to access the console</p>
           </div>
 

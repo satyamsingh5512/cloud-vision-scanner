@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { registerUser, getAllUsers, getUserById, deleteUser, deleteAllUsers, bulkUploadUsers } = require('../controllers/user.controller');
+const { registerUser, getAllUsers, getUserById, updateUser, deleteUser, deleteAllUsers, bulkUploadUsers } = require('../controllers/user.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 
 const uploadDir = process.env.UPLOAD_DIR || path.join(os.tmpdir(), 'event-scanner-uploads');
@@ -32,6 +32,7 @@ router.post('/register', authMiddleware, registerUser);
 router.post('/bulk-upload', authMiddleware, upload.single('file'), bulkUploadUsers);
 router.get('/', authMiddleware, getAllUsers);
 router.delete('/', authMiddleware, deleteAllUsers);
+router.put('/:userId', authMiddleware, updateUser);
 router.delete('/:userId', authMiddleware, deleteUser);
 
 module.exports = router;

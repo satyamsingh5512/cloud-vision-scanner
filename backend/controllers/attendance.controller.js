@@ -3,11 +3,19 @@ const prisma = require('../config/db');
 // GET /api/attendance
 const getAllAttendance = async (req, res) => {
   try {
-    const { group, sessionId, startDate, endDate, limit = 500 } = req.query;
+    const { group, sessionId, startDate, endDate, q, limit = 500 } = req.query;
     const where = {};
 
     if (group) where.group = group;
     if (sessionId) where.sessionId = sessionId;
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { userId: { contains: q, mode: 'insensitive' } },
+        { group: { contains: q, mode: 'insensitive' } },
+        { sessionId: { contains: q, mode: 'insensitive' } },
+      ];
+    }
     if (startDate || endDate) {
       where.scannedAt = {};
       if (startDate) where.scannedAt.gte = new Date(startDate);
@@ -27,6 +35,59 @@ const getAllAttendance = async (req, res) => {
     res.json({ count: records.length, records });
   } catch (err) {
     console.error('Get attendance error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// PUT /api/attendance/:id
+const updateAttendance = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ message: 'Invalid attendance id' });
+    }
+
+    const { name, group, sessionId, markedBy } = req.body;
+    const data = {};
+    if (name !== undefined) data.name = String(name).trim();
+    if (group !== undefined) data.group = String(group).trim();
+    if (sessionId !== undefined) data.sessionId = String(sessionId).trim();
+    if (markedBy !== undefined) data.markedBy = String(markedBy).trim();
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ message: 'No update fields provided' });
+    }
+
+    const record = await prisma.attendance.update({
+      where: { id },
+      data,
+    });
+
+    res.json({ message: 'Attendance updated successfully', record });
+  } catch (err) {
+    console.error('Update attendance error:', err);
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Attendance record not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// DELETE /api/attendance/:id
+const deleteAttendance = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ message: 'Invalid attendance id' });
+    }
+
+    await prisma.attendance.delete({ where: { id } });
+    res.json({ message: 'Attendance record removed successfully' });
+  } catch (err) {
+    console.error('Delete attendance error:', err);
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'Attendance record not found' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -91,4 +152,4 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { getAllAttendance, getBySession, getByGroup, getStats };
+module.exports = { getAllAttendance, updateAttendance, deleteAttendance, getBySession, getByGroup, getStats };

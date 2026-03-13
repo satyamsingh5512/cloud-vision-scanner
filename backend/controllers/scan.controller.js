@@ -50,8 +50,19 @@ const verifyScan = async (req, res) => {
         });
       }
 
+      const dbUser = await prisma.user.findFirst({
+        where: { email, isActive: true }
+      });
+
+      if (!dbUser) {
+        return res.status(200).json({
+          status: 'NOT_REGISTERED',
+          message: 'Scanned email is not registered in database',
+        });
+      }
+
       const existingTicketRecord = await prisma.attendance.findFirst({
-        where: { userId: email, sessionId: effectiveSessionId }
+        where: { userId: dbUser.userId, sessionId: effectiveSessionId }
       });
 
       if (existingTicketRecord) {
@@ -59,10 +70,10 @@ const verifyScan = async (req, res) => {
           status: 'ALREADY_MARKED',
           message: 'Attendance already marked for this ticket/session',
           user: {
-            name: payload.name || 'Unknown',
-            email: payload.email || null,
-            phone: payload.phone || null,
-            rollno: payload.rollno || null,
+            name: dbUser.name,
+            email: dbUser.email,
+            phone: dbUser.phone,
+            rollno: dbUser.rollno,
             event: payload.event || null,
             date: payload.date || null,
             time: payload.time || null,
@@ -72,7 +83,8 @@ const verifyScan = async (req, res) => {
             orderId,
             amount: payload.amount || null,
             type: payload.type || null,
-            group: payload.event || 'Ticket'
+            group: dbUser.group,
+            region: dbUser.region,
           },
           markedAt: existingTicketRecord.scannedAt,
         });
@@ -80,9 +92,9 @@ const verifyScan = async (req, res) => {
 
       const ticketRecord = await prisma.attendance.create({
         data: {
-          userId: email,
-          name: payload.name || 'Unknown',
-          group: payload.event || 'Ticket',
+          userId: dbUser.userId,
+          name: dbUser.name,
+          group: dbUser.group,
           sessionId: effectiveSessionId,
           markedBy,
           scannedAt: new Date(),
@@ -93,10 +105,10 @@ const verifyScan = async (req, res) => {
         status: 'SUCCESS',
         message: 'Ticket verified and attendance marked',
         user: {
-          name: payload.name || 'Unknown',
-          email: payload.email || null,
-          phone: payload.phone || null,
-          rollno: payload.rollno || null,
+          name: dbUser.name,
+          email: dbUser.email,
+          phone: dbUser.phone,
+          rollno: dbUser.rollno,
           event: payload.event || null,
           date: payload.date || null,
           time: payload.time || null,
@@ -106,7 +118,8 @@ const verifyScan = async (req, res) => {
           orderId,
           amount: payload.amount || null,
           type: payload.type || null,
-          group: payload.event || 'Ticket'
+          group: dbUser.group,
+          region: dbUser.region,
         },
         markedAt: ticketRecord.scannedAt,
       });

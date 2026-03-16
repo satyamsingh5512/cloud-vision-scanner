@@ -89,6 +89,29 @@ const AttendancePage = () => {
     }
   };
 
+  const downloadCSV = () => {
+    if (filteredLogs.length === 0) return;
+
+    const headers = ['Time', 'Name', 'Group', 'Session', 'Marked By'];
+    const rows = filteredLogs.map((log) => [
+      `"${new Date(log.scannedAt).toLocaleString().replace(/"/g, '""')}"`,
+      `"${(log.name || 'Unknown').replace(/"/g, '""')}"`,
+      `"${(log.group || 'N/A').replace(/"/g, '""')}"`,
+      `"${(log.sessionId || 'default-session').replace(/"/g, '""')}"`,
+      `"${(log.markedBy || 'System').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'attendance_logs.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28">
@@ -98,7 +121,12 @@ const AttendancePage = () => {
               <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">Scanned Logs</h1>
               <p className="mt-1 text-slate-400 font-medium tracking-tight">Search, edit, and remove scanned attendance records.</p>
             </div>
-            <button onClick={fetchLogs} className="btn-ghost">Refresh</button>
+            <div className="flex gap-3">
+              <button onClick={downloadCSV} className="btn-ghost disabled:opacity-50" disabled={filteredLogs.length === 0}>
+                Download CSV
+              </button>
+              <button onClick={fetchLogs} className="btn-ghost">Refresh</button>
+            </div>
           </div>
 
           <div className="glass-panel rounded-2xl p-3 sm:p-4">

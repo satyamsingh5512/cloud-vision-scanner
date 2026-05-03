@@ -37,8 +37,8 @@ const RegisterPage = () => {
             </span>
             Identity Enrollment
           </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tight">Register Attendee</h1>
-          <p className="mt-2 text-slate-400 font-medium tracking-tight">Issue new credentials and generate unique verification keys.</p>
+          <h1 className="text-4xl font-extrabold text-white tracking-tight">Register attendee</h1>
+          <p className="mt-2 text-slate-400 font-medium tracking-tight">Create credentials and generate a unique verification pass.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">

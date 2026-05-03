@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getAllUsers, bulkUploadUsers, deleteAllUsers, updateUser, deleteUser } from '../services/api';
+import Card from '../components/ui/Card';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 const emptyEdit = {
   userId: '',
@@ -164,12 +167,12 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28">
+      <div className="mx-auto max-w-7xl px-1 pb-12">
         <div className="reveal space-y-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">Admin Console</h1>
-              <p className="mt-1 text-slate-400 font-medium tracking-tight">Manage students and attendance records.</p>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">Operations Dashboard</h1>
+              <p className="mt-1 text-slate-400 font-medium tracking-tight">Manage attendees, imports, and attendance data with precision.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/5 bg-white/5 p-1">
@@ -184,7 +187,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="glass-panel rounded-2xl p-3 sm:p-4">
+          <Card className="p-3 sm:p-4">
             <input
               type="text"
               value={query}
@@ -192,7 +195,7 @@ const AdminDashboard = () => {
               className="input-premium"
               placeholder="Search students by name, email, group, roll, region"
             />
-          </div>
+          </Card>
 
           {uploadStatus && <div className={`rounded-2xl border p-4 text-sm ${uploadStatus.success ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border-red-500/20 bg-red-500/10 text-red-400'}`}>{uploadStatus.message}</div>}
           {deleteStatus && <div className={`rounded-2xl border p-4 text-sm ${deleteStatus.success ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' : 'border-red-500/20 bg-red-500/10 text-red-400'}`}>{deleteStatus.message}</div>}
@@ -204,14 +207,14 @@ const AdminDashboard = () => {
               { label: 'Active', value: stats.active },
               { label: 'Groups', value: stats.groups },
             ].map((stat) => (
-              <div key={stat.label} className="glass-panel rounded-3xl p-6">
+              <Card key={stat.label} className="p-6">
                 <p className="text-xs uppercase text-slate-500">{stat.label}</p>
                 <h3 className="mt-2 text-4xl font-black text-white">{stat.value}</h3>
-              </div>
+              </Card>
             ))}
           </div>
 
-          <div className="glass-panel overflow-hidden rounded-3xl">
+          <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4">
               <h2 className="text-lg font-bold text-white">Students</h2>
               <span className="text-xs uppercase text-slate-500">{filteredUsers.length} results</span>
@@ -230,9 +233,25 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {loading ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">Loading...</td></tr>
+                    <tr>
+                      <td colSpan="5" className="px-6 py-5">
+                        <div className="space-y-3">
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                      </td>
+                    </tr>
                   ) : filteredUsers.length === 0 ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">No users found</td></tr>
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8">
+                        <EmptyState
+                          title="No attendees yet"
+                          description="Import a CSV or add your first attendee manually to get started."
+                          action={<a href="/admin/register" className="btn-premium">Add first attendee</a>}
+                        />
+                      </td>
+                    </tr>
                   ) : filteredUsers.map((user) => (
                     <tr key={user.userId}>
                       <td className="px-6 py-4 text-white font-semibold">{user.name}</td>
@@ -252,6 +271,12 @@ const AdminDashboard = () => {
             </div>
 
             <div className="space-y-3 p-4 md:hidden">
+              {!loading && filteredUsers.length === 0 ? (
+                <EmptyState
+                  title="No attendees yet"
+                  description="Import a CSV or add your first attendee manually."
+                />
+              ) : null}
               {filteredUsers.map((user) => (
                 <div key={user.userId} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <p className="text-base font-bold text-white">{user.name}</p>
@@ -264,7 +289,7 @@ const AdminDashboard = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 

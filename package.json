@@ -5,15 +5,15 @@
   "private": true,
   "scripts": {
     "ports:free": "sh -c 'fuser -k 5000/tcp 5173/tcp 2>/dev/null || true'",
-    "dev": "npm run ports:free && concurrently -n \"backend,web\" -c \"cyan,magenta\" \"nodemon\" \"vite\"",
-    "dev:backend": "nodemon",
-    "dev:web": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "npm run ports:free && node node_modules/concurrently/dist/bin/concurrently.js -n \"backend,web\" -c \"cyan,magenta\" \"node node_modules/nodemon/bin/nodemon.js\" \"node node_modules/vite/bin/vite.js\"",
+    "dev:backend": "node node_modules/nodemon/bin/nodemon.js",
+    "dev:web": "node node_modules/vite/bin/vite.js",
+    "build": "node node_modules/vite/bin/vite.js build",
+    "preview": "node node_modules/vite/bin/vite.js preview",
     "start": "node backend/server.js",
     "lint": "eslint .",
-    "prisma:generate": "prisma generate --schema backend/prisma/schema.prisma",
-    "postinstall": "prisma generate --schema backend/prisma/schema.prisma"
+    "prisma:generate": "node node_modules/prisma/build/index.js generate --schema backend/prisma/schema.prisma",
+    "postinstall": "node node_modules/prisma/build/index.js generate --schema backend/prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
@@ -50,5 +50,19 @@
     "globals": "^16.5.0",
     "nodemon": "^3.1.0",
     "vite": "^7.3.1"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/satyamsingh5512/cloud-vision-scanner.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/satyamsingh5512/cloud-vision-scanner/issues"
+  },
+  "homepage": "https://github.com/satyamsingh5512/cloud-vision-scanner#readme"
 }

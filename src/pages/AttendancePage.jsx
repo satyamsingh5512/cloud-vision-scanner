@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAttendance, updateAttendanceLog, deleteAttendanceLog } from '../services/api';
+import Card from '../components/ui/Card';
+import Skeleton from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 const emptyLogEdit = {
   id: null,
@@ -89,47 +92,19 @@ const AttendancePage = () => {
     }
   };
 
-  const downloadCSV = () => {
-    if (filteredLogs.length === 0) return;
-
-    const headers = ['Time', 'Name', 'Group', 'Session', 'Marked By'];
-    const rows = filteredLogs.map((log) => [
-      `"${new Date(log.scannedAt).toLocaleString().replace(/"/g, '""')}"`,
-      `"${(log.name || 'Unknown').replace(/"/g, '""')}"`,
-      `"${(log.group || 'N/A').replace(/"/g, '""')}"`,
-      `"${(log.sessionId || 'default-session').replace(/"/g, '""')}"`,
-      `"${(log.markedBy || 'System').replace(/"/g, '""')}"`,
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'attendance_logs.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <>
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28">
+      <div className="mx-auto max-w-7xl px-1 pb-12">
         <div className="reveal space-y-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">Scanned Logs</h1>
-              <p className="mt-1 text-slate-400 font-medium tracking-tight">Search, edit, and remove scanned attendance records.</p>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">Attendance Timeline</h1>
+              <p className="mt-1 text-slate-400 font-medium tracking-tight">Search, review, and adjust scanned attendance records.</p>
             </div>
-            <div className="flex gap-3">
-              <button onClick={downloadCSV} className="btn-ghost disabled:opacity-50" disabled={filteredLogs.length === 0}>
-                Download CSV
-              </button>
-              <button onClick={fetchLogs} className="btn-ghost">Refresh</button>
-            </div>
+            <button onClick={fetchLogs} className="btn-ghost">Refresh</button>
           </div>
 
-          <div className="glass-panel rounded-2xl p-3 sm:p-4">
+          <Card className="p-3 sm:p-4">
             <input
               type="text"
               value={query}
@@ -137,11 +112,11 @@ const AttendancePage = () => {
               className="input-premium"
               placeholder="Search logs by name, group, session, scanner"
             />
-          </div>
+          </Card>
 
           {error && <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">{error}</div>}
 
-          <div className="glass-panel overflow-hidden rounded-3xl">
+          <Card className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4">
               <h2 className="text-lg font-bold text-white">Attendance Records</h2>
               <span className="text-xs uppercase text-slate-500">{filteredLogs.length} results</span>
@@ -160,9 +135,24 @@ const AttendancePage = () => {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {loading ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">Loading...</td></tr>
+                    <tr>
+                      <td colSpan="5" className="px-6 py-5">
+                        <div className="space-y-3">
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                      </td>
+                    </tr>
                   ) : filteredLogs.length === 0 ? (
-                    <tr><td colSpan="5" className="px-6 py-10 text-center text-slate-500">No logs found</td></tr>
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8">
+                        <EmptyState
+                          title="No attendance logs yet"
+                          description="Start scanning attendees to populate this timeline."
+                        />
+                      </td>
+                    </tr>
                   ) : filteredLogs.map((log) => (
                     <tr key={log.id}>
                       <td className="px-6 py-4 text-slate-300">{new Date(log.scannedAt).toLocaleString()}</td>
@@ -182,6 +172,12 @@ const AttendancePage = () => {
             </div>
 
             <div className="space-y-3 p-4 md:hidden">
+              {!loading && filteredLogs.length === 0 ? (
+                <EmptyState
+                  title="No attendance logs yet"
+                  description="Start scanning attendees to populate this list."
+                />
+              ) : null}
               {filteredLogs.map((log) => (
                 <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
                   <p className="text-base font-bold text-white">{log.name || 'Unknown'}</p>
@@ -194,7 +190,7 @@ const AttendancePage = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </div>
 

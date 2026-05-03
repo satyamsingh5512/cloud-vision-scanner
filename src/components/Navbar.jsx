@@ -34,8 +34,8 @@ const Navbar = () => {
 
   const activeLink = (path) =>
     location.pathname === path
-      ? 'text-white bg-white/10'
-      : 'text-slate-400 hover:text-white hover:bg-white/5';
+      ? 'text-primary bg-white/10'
+      : 'text-secondary hover:text-primary hover:bg-white/5';
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -49,14 +49,14 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 shadow-lg shadow-cyan-500/20 transition-transform group-hover:scale-110">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg shadow-orange-300/40 transition-transform group-hover:scale-110">
               <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 17h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tight text-white">SCAN<span className="text-indigo-400">PRO</span></span>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold leading-none">Attendance</span>
+              <span className="text-lg font-extrabold tracking-tight text-primary">Scan<span className="text-indigo-400">Pro</span></span>
+              <span className="text-[10px] tracking-[0.16em] text-slate-500 font-semibold leading-none">Attendance platform</span>
             </div>
           </Link>
 

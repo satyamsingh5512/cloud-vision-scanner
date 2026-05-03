@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import RegisterPage from './pages/RegisterPage';
 import AttendancePage from './pages/AttendancePage';
+import DashboardShell from './components/layout/DashboardShell';
 
 const App = () => (
   <AuthProvider>
@@ -26,7 +27,9 @@ const App = () => (
             path="/admin"
             element={
               <ProtectedRoute>
-                <AdminDashboard />
+                <DashboardShell>
+                  <AdminDashboard />
+                </DashboardShell>
               </ProtectedRoute>
             }
           />
@@ -34,7 +37,9 @@ const App = () => (
             path="/admin/register"
             element={
               <ProtectedRoute>
-                <RegisterPage />
+                <DashboardShell>
+                  <RegisterPage />
+                </DashboardShell>
               </ProtectedRoute>
             }
           />
@@ -42,7 +47,9 @@ const App = () => (
             path="/admin/attendance"
             element={
               <ProtectedRoute>
-                <AttendancePage />
+                <DashboardShell>
+                  <AttendancePage />
+                </DashboardShell>
               </ProtectedRoute>
             }
           />

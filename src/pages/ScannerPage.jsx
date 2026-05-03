@@ -164,10 +164,10 @@ const ScannerPage = () => {
         <div className="absolute top-1/2 left-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/5 blur-[120px]" />
 
         <div className="mb-8 space-y-2">
-          <h1 className="text-4xl font-black text-white tracking-widest uppercase">
-            Scanner<span className="text-indigo-500">Node</span>
+          <h1 className="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">
+            Scanner<span className="text-indigo-500">Console</span>
           </h1>
-          <p className="text-xs font-black uppercase tracking-[0.4em] text-slate-500">Identity Verification Gateway</p>
+          <p className="text-sm font-semibold tracking-[0.08em] text-slate-500">Real-time identity verification gateway</p>
         </div>
 
         <div className="relative">
@@ -185,7 +185,7 @@ const ScannerPage = () => {
               <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-4">
                   <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-500/20 border-t-indigo-500" />
-                  <span className="text-xs font-black uppercase tracking-widest text-white">Verifying Identity...</span>
+                  <span className="text-xs font-bold tracking-[0.14em] text-white">Verifying identity...</span>
                 </div>
               </div>
             )}
